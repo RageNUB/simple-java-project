@@ -1,4 +1,7 @@
+package main;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.*;
 import java.util.*;
@@ -61,21 +64,60 @@ class StoreFrame extends JFrame {
         showLoginScreen();
     }
 
+    void styleButton(JButton button) {
+        button.setBackground(new Color(59, 89, 182));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setFont(new Font("Tahoma", Font.BOLD, 12));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+//        button.setArc
+    }
+
     void showLoginScreen() {
-        JPanel panel = new JPanel(new GridLayout(4, 4));
-        setSize(400, 300);
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
         JTextField usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(200, 30));
+        usernameField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+
         JPasswordField passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(200, 30));
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         JButton loginBtn = new JButton("Login");
         JButton registerBtn = new JButton("Register");
+        styleButton(loginBtn);
+        styleButton(registerBtn);
 
-        panel.add(new JLabel("Username:"));
-        panel.add(usernameField);
-        panel.add(new JLabel("Password:"));
-        panel.add(passwordField);
-        panel.add(loginBtn);
-        panel.add(registerBtn);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("Username:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(usernameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Password:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(passwordField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(loginBtn, gbc);
+
+        gbc.gridx = 1;
+        panel.add(registerBtn, gbc);
 
         setContentPane(panel);
         revalidate();
@@ -119,12 +161,57 @@ class StoreFrame extends JFrame {
         });
     }
 
+    private JPanel createProductCard(Product product) {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(new EmptyBorder(10, 10, 10, 10));
+        card.setBackground(Color.WHITE);
+        card.setPreferredSize(new Dimension(200, 250));
+
+        JLabel nameLabel = new JLabel(product.name, SwingConstants.CENTER);
+        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+
+        ImageIcon icon = new ImageIcon(product.imagePath);
+        Image scaledImage = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+        JLabel imageLabel = new JLabel(new ImageIcon(scaledImage));
+        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+
+        JLabel priceLabel = new JLabel("Price: $" + product.price, SwingConstants.CENTER);
+        priceLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        priceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        card.add(nameLabel);
+        card.add(Box.createVerticalStrut(10));
+        card.add(imageLabel);
+        card.add(Box.createVerticalStrut(10));
+        card.add(priceLabel);
+
+        if(!currentUser.isAdmin) {
+        JButton addToCartButton = new JButton("Add to Cart");
+            addToCartButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+            styleButton(addToCartButton);
+            addToCartButton.addActionListener(e -> {
+                cart.add(product);
+                JOptionPane.showMessageDialog(this, product.name + " Added to cart!");
+            });
+            card.add(Box.createVerticalStrut(10));
+            card.add(addToCartButton);
+        }
+
+        return card;
+    }
+
     void showUserScreen() {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel top = new JPanel();
         JButton cartBtn = new JButton("Cart");
         JButton orderHistoryBtn = new JButton("Orders");
         JButton logoutBtn = new JButton("Logout");
+        styleButton(cartBtn);
+        styleButton(orderHistoryBtn);
+        styleButton(logoutBtn);
 
         top.add(cartBtn);
         top.add(orderHistoryBtn);
@@ -132,26 +219,27 @@ class StoreFrame extends JFrame {
 
         panel.add(top, BorderLayout.NORTH);
 
-        JPanel productsPanel = new JPanel(new GridLayout(0, 4, 10, 10));
-        for (Product p : allProducts) {
-            JPanel card = new JPanel(new BorderLayout());
-            JLabel imgLabel = new JLabel();
-            if (!p.imagePath.isEmpty()) imgLabel.setIcon(new ImageIcon(p.imagePath));
-            JLabel nameLabel = new JLabel(p.name);
-            JLabel priceLabel = new JLabel("$" + p.price);
-            JButton addBtn = new JButton("Add to Cart");
-            addBtn.addActionListener(e -> {
-                cart.add(p);
-                JOptionPane.showMessageDialog(this, p.name + " added to cart");
-            });
-            card.add(imgLabel, BorderLayout.CENTER);
-            card.add(nameLabel, BorderLayout.NORTH);
-            card.add(priceLabel, BorderLayout.SOUTH);
-            card.add(addBtn, BorderLayout.EAST);
-            productsPanel.add(card);
-        }
+        JPanel productsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
-        panel.add(new JScrollPane(productsPanel), BorderLayout.CENTER);
+        int cols = 5;
+        for (int i = 0; i < allProducts.size(); i++) {
+            JPanel card = createProductCard(allProducts.get(i));
+
+            gbc.gridx = i % cols;
+            gbc.gridy = i / cols;
+            gbc.weightx = 1.0 / cols;
+            gbc.gridwidth = 1;
+
+            productsPanel.add(card, gbc);
+        }
+        JScrollPane scrollPane = new JScrollPane(productsPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+
         cartBtn.addActionListener(e -> showCartDialog());
         orderHistoryBtn.addActionListener(e -> showUserOrdersDialog());
         logoutBtn.addActionListener(e -> {
@@ -170,6 +258,9 @@ class StoreFrame extends JFrame {
         JButton addProductBtn = new JButton("Add Product");
         JButton viewAllOrdersBtn = new JButton("View All Orders");
         JButton logoutBtn = new JButton("Logout");
+        styleButton(addProductBtn);
+        styleButton(viewAllOrdersBtn);
+        styleButton(logoutBtn);
 
         top.add(addProductBtn);
         top.add(viewAllOrdersBtn);
@@ -177,20 +268,25 @@ class StoreFrame extends JFrame {
 
         panel.add(top, BorderLayout.NORTH);
 
-        JPanel productsPanel = new JPanel(new GridLayout(0, 4, 10, 10));
-        for (Product p : allProducts) {
-            JPanel card = new JPanel(new BorderLayout());
-            JLabel imgLabel = new JLabel();
-            if (!p.imagePath.isEmpty()) imgLabel.setIcon(new ImageIcon(p.imagePath));
-            JLabel nameLabel = new JLabel(p.name);
-            JLabel priceLabel = new JLabel("$" + p.price);
-            card.add(imgLabel, BorderLayout.CENTER);
-            card.add(nameLabel, BorderLayout.NORTH);
-            card.add(priceLabel, BorderLayout.SOUTH);
-            productsPanel.add(card);
-        }
+        JPanel productsPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
 
-        panel.add(new JScrollPane(productsPanel), BorderLayout.CENTER);
+        int cols = 5;
+        for (int i = 0; i < allProducts.size(); i++) {
+            JPanel card = createProductCard(allProducts.get(i));
+
+            gbc.gridx = i % cols;
+            gbc.gridy = i / cols;
+            gbc.weightx = 1.0 / cols;
+            gbc.gridwidth = 1;
+
+            productsPanel.add(card, gbc);
+        }
+        JScrollPane scrollPane = new JScrollPane(productsPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         addProductBtn.addActionListener(e -> showAddProductDialog());
         viewAllOrdersBtn.addActionListener(e -> showAllOrdersDialog());

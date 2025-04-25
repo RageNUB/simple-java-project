@@ -1,3 +1,2 @@
 rimon,1234,false
 admin,admin,false
-jubaidul,4321,false
