@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-public class ECommerceApp {
+public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new StoreFrame().setVisible(true));
     }
@@ -71,7 +71,6 @@ class StoreFrame extends JFrame {
         button.setFont(new Font("Tahoma", Font.BOLD, 12));
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-//        button.setArc
     }
 
     void showLoginScreen() {
