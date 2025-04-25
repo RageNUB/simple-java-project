@@ -1,3 +1,3 @@
-Rimon,1234
-rimon,1234
-jubaidul,1234
+rimon,1234,false
+admin,admin,false
+jubaidul,4321,false
