@@ -202,22 +202,7 @@ class StoreFrame extends JFrame {
         return card;
     }
 
-    void showUserScreen() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JPanel top = new JPanel();
-        JButton cartBtn = new JButton("Cart");
-        JButton orderHistoryBtn = new JButton("Orders");
-        JButton logoutBtn = new JButton("Logout");
-        styleButton(cartBtn);
-        styleButton(orderHistoryBtn);
-        styleButton(logoutBtn);
-
-        top.add(cartBtn);
-        top.add(orderHistoryBtn);
-        top.add(logoutBtn);
-
-        panel.add(top, BorderLayout.NORTH);
-
+    void ProductsPanel(JPanel panel){
         JPanel productsPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -237,7 +222,25 @@ class StoreFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(productsPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         panel.add(scrollPane, BorderLayout.CENTER);
+    }
 
+    void showUserScreen() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JPanel top = new JPanel();
+        JButton cartBtn = new JButton("Cart");
+        JButton orderHistoryBtn = new JButton("Orders");
+        JButton logoutBtn = new JButton("Logout");
+        styleButton(cartBtn);
+        styleButton(orderHistoryBtn);
+        styleButton(logoutBtn);
+
+        top.add(cartBtn);
+        top.add(orderHistoryBtn);
+        top.add(logoutBtn);
+
+        panel.add(top, BorderLayout.NORTH);
+
+        ProductsPanel(panel);
 
         cartBtn.addActionListener(e -> showCartDialog());
         orderHistoryBtn.addActionListener(e -> showUserOrdersDialog());
@@ -267,31 +270,12 @@ class StoreFrame extends JFrame {
 
         panel.add(top, BorderLayout.NORTH);
 
-        JPanel productsPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 1.0;
-
-        int cols = 5;
-        for (int i = 0; i < allProducts.size(); i++) {
-            JPanel card = createProductCard(allProducts.get(i));
-
-            gbc.gridx = i % cols;
-            gbc.gridy = i / cols;
-            gbc.weightx = 1.0 / cols;
-            gbc.gridwidth = 1;
-
-            productsPanel.add(card, gbc);
-        }
-        JScrollPane scrollPane = new JScrollPane(productsPanel);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        panel.add(scrollPane, BorderLayout.CENTER);
+        ProductsPanel(panel);
 
         addProductBtn.addActionListener(e -> showAddProductDialog());
         viewAllOrdersBtn.addActionListener(e -> showAllOrdersDialog());
         logoutBtn.addActionListener(e -> {
             currentUser = null;
-            cart.clear();
             showLoginScreen();
         });
 
